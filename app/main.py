@@ -6,7 +6,19 @@ from fastapi import FastAPI, HTTPException
 
 from app.generator import GenerationError, MissingApiKeyError, generate_ad_copy
 from app.models import AdCopyResponse, ProductRequest
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
+app = FastAPI()
+
+# Enable CORS for local browser access
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins during local dev
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
 

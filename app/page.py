@@ -3,7 +3,7 @@ import logging
 import socket
 from urllib.parse import urlparse
 
-import httpx2
+import httpx
 from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
@@ -45,10 +45,10 @@ async def fetch_page_text(url: str) -> str | None:
         return None
 
     try:
-        async with httpx2.AsyncClient(timeout=8.0, follow_redirects=False) as client:
+        async with httpx.AsyncClient(timeout=8.0, follow_redirects=False) as client:
             response = await client.get(url, headers={"User-Agent": _USER_AGENT})
             response.raise_for_status()
-    except (httpx2.HTTPError, PageFetchError) as exc:
+    except (httpx.HTTPError, PageFetchError) as exc:
         logger.info("Product page fetch failed: %s", exc)
         return None
 

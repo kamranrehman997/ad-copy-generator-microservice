@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ad Copy Generator Microservice Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="border-b border-slate-800 bg-slate-900/60 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-400 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid font-bold fa-bolt text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-none bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">AdCraft AI</h1>
+                    <p class="text-xs text-slate-400 mt-0.5 font-mono">Microservice Dashboard v1.0.0</p>
+                </div>
+            </div>
+
+            <!-- Endpoint Status Indicator -->
+            <div class="flex items-center gap-4">
+                <div id="backend-status-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-slate-800 border border-slate-700 text-slate-300">
+                    <span class="relative flex h-2 w-2">
+                        <span id="status-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span id="status-dot" class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    </span>
+                    <span id="status-text">Checking Backend...</span>
+                </div>
+                <a href="http://localhost:8000/docs" target="_blank" rel="noopener" class="hidden sm:flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 transition-colors bg-indigo-950/40 border border-indigo-800/50 px-3 py-1.5 rounded-lg">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Swagger Docs</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left Panel: Input Configuration Form -->
+        <section class="lg:col-span-5 flex flex-col gap-6">
+            <div class="glass-panel p-6 rounded-2xl shadow-xl">
+                <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-800">
+                    <h2 class="text-lg font-semibold flex items-center gap-2 text-white">
+                        <i class="fa-solid fa-sliders text-indigo-400"></i>
+                        Ad Campaign Inputs
+                    </h2>
+                    <button type="button" id="fill-demo-btn" class="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-medium transition">
+                        <i class="fa-solid fa-magic"></i> Auto-fill Demo
+                    </button>
+                </div>
+
+                <form id="ad-form" class="space-y-4">
+                    <!-- Product Name -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Product Name</label>
+                        <input type="text" id="product-name" required placeholder="e.g. Modern Wooden Wardrobe" 
+                            class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                    </div>
+
+                    <!-- Category & Audience -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Category / Niche</label>
+                            <input type="text" id="product-category" placeholder="e.g. Home & Furniture" 
+                                class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Target Audience</label>
+                            <input type="text" id="target-audience" placeholder="e.g. Homeowners & Interior Designers" 
+                                class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                        </div>
+                    </div>
+
+                    <!-- Key Features -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Key Features & Benefits</label>
+                        <textarea id="key-features" rows="3" required placeholder="Solid oak wood, built-in full length mirror, soft-close sliding doors..." 
+                            class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition"></textarea>
+                    </div>
+
+                    <!-- Tone of Voice -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Tone of Voice</label>
+                        <select id="tone" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                            <option value="High-Converting">High-Converting (Direct Response)</option>
+                            <option value="Energetic">Energetic & Hype</option>
+                            <option value="Professional">Professional & Premium</option>
+                            <option value="Witty">Witty & Playful</option>
+                            <option value="Urgency-Driven">Urgency-Driven & FOMO</option>
+                        </select>
+                    </div>
+
+                    <!-- Target Platform / Channel -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Target Platforms</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="flex items-center gap-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700 transition">
+                                <input type="checkbox" name="platform" value="Facebook" checked class="rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                                <span class="text-xs font-medium text-slate-200"><i class="fa-brands fa-facebook text-blue-500 mr-1"></i> Facebook Ad</span>
+                            </label>
+                            <label class="flex items-center gap-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700 transition">
+                                <input type="checkbox" name="platform" value="Instagram" checked class="rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                                <span class="text-xs font-medium text-slate-200"><i class="fa-brands fa-instagram text-pink-500 mr-1"></i> Instagram</span>
+                            </label>
+                            <label class="flex items-center gap-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700 transition">
+                                <input type="checkbox" name="platform" value="Google" checked class="rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                                <span class="text-xs font-medium text-slate-200"><i class="fa-brands fa-google text-red-500 mr-1"></i> Google Search</span>
+                            </label>
+                            <label class="flex items-center gap-2 bg-slate-900 border border-slate-800 p-2.5 rounded-xl cursor-pointer hover:border-slate-700 transition">
+                                <input type="checkbox" name="platform" value="TikTok" class="rounded bg-slate-800 border-slate-700 text-indigo-600 focus:ring-indigo-500">
+                                <span class="text-xs font-medium text-slate-200"><i class="fa-brands fa-tiktok text-cyan-400 mr-1"></i> TikTok Script</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="generate-btn" class="w-full mt-2 py-3.5 px-4 bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition transform active:scale-[0.99]">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Generate Copy Variants</span>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Right Panel: Results & Payload Inspector -->
+        <section class="lg:col-span-7 flex flex-col gap-6">
+            
+            <!-- Navigation Tabs -->
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div class="flex gap-2">
+                    <button id="tab-copies" onclick="switchTab('copies')" class="px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center gap-2 transition">
+                        <i class="fa-solid fa-rectangle-ad"></i>
+                        <span>Generated Copies</span>
+                        <span id="copies-count-badge" class="ml-1 px-1.5 py-0.5 text-xs bg-indigo-500/30 text-indigo-300 rounded-full">0</span>
+                    </button>
+                    <button id="tab-payload" onclick="switchTab('payload')" class="px-4 py-2 text-sm font-medium rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 flex items-center gap-2 transition">
+                        <i class="fa-solid fa-code"></i>
+                        <span>JSON Microservice Payload</span>
+                    </button>
+                </div>
+                <div class="text-xs text-slate-500 font-mono hidden sm:block">
+                    Target: <span class="text-slate-400">http://localhost:8000/generate</span>
+                </div>
+            </div>
+
+            <!-- View 1: Generated Copy Cards -->
+            <div id="view-copies" class="space-y-4">
+                
+                <!-- Initial State Placeholder -->
+                <div id="placeholder-state" class="glass-panel p-12 rounded-2xl text-center border-dashed border-2 border-slate-800 flex flex-col items-center justify-center">
+                    <div class="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600 text-2xl mb-4 shadow-inner">
+                        <i class="fa-solid fa-lightbulb"></i>
+                    </div>
+                    <h3 class="text-base font-semibold text-slate-300">No Copy Generated Yet</h3>
+                    <p class="text-xs text-slate-500 max-w-sm mt-1 mb-6">Fill out your custom product inputs on the left and click "Generate Copy Variants".</p>
+                </div>
+
+                <!-- Loading Spinner State -->
+                <div id="loading-state" class="hidden glass-panel p-12 rounded-2xl text-center flex flex-col items-center justify-center">
+                    <div class="relative w-16 h-16 mb-4">
+                        <div class="absolute inset-0 rounded-full border-4 border-indigo-500/20 animate-ping"></div>
+                        <div class="w-16 h-16 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+                    </div>
+                    <h3 class="text-base font-semibold text-slate-200">Processing Microservice Request</h3>
+                    <p class="text-xs text-slate-400 mt-1">Executing model inference & structuring payload...</p>
+                </div>
+
+                <!-- Generated Cards Container -->
+                <div id="cards-container" class="space-y-4"></div>
+            </div>
+
+            <!-- View 2: Raw JSON Response Inspector -->
+            <div id="view-payload" class="hidden">
+                <div class="glass-panel rounded-2xl overflow-hidden border border-slate-800">
+                    <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+                            <span class="ml-2 font-mono text-xs text-slate-400">Response payload: 200 OK</span>
+                        </div>
+                        <button onclick="copyPayload()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 font-mono transition">
+                            <i class="fa-regular fa-copy"></i> Copy Raw JSON
+                        </button>
+                    </div>
+                    <pre class="p-4 text-xs font-mono text-emerald-400 bg-slate-950 overflow-x-auto max-h-[500px]" id="raw-json">
+{
+  "status": "awaiting_request",
+  "message": "Submit form to execute backend POST request."
+}
+                    </pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-slate-800 bg-slate-950 py-4 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div>Ad Copy Microservice Infrastructure &bull; FastAPI + Docker + ARM64</div>
+            <div class="flex items-center gap-4">
+                <span id="backend-type-footer" class="text-slate-400">Mode: Auto-Detecting</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 glass-panel border border-indigo-500/40 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 z-50">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toast-message" class="text-xs font-medium">Text copied to clipboard!</span>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        const API_URL = 'http://localhost:8000/generate';
+        const HEALTH_URL = 'http://localhost:8000/docs';
+        
+        let isBackendAvailable = false;
+        let lastResponseData = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            checkBackendHealth();
+        });
+
+        async function checkBackendHealth() {
+            const badge = document.getElementById('backend-status-badge');
+            const dot = document.getElementById('status-dot');
+            const ping = document.getElementById('status-ping');
+            const text = document.getElementById('status-text');
+            const footerMode = document.getElementById('backend-type-footer');
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2000);
+                
+                await fetch(HEALTH_URL, { mode: 'no-cors', signal: controller.signal });
+                clearTimeout(timeoutId);
+
+                isBackendAvailable = true;
+                badge.className = "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-950/60 border border-emerald-800/80 text-emerald-300";
+                dot.className = "relative inline-flex rounded-full h-2 w-2 bg-emerald-400";
+                ping.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75";
+                text.innerText = "FastAPI Backend Live";
+                footerMode.innerText = "Mode: Live Docker Container (Port 8000)";
+            } catch (err) {
+                isBackendAvailable = false;
+                badge.className = "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-amber-950/60 border border-amber-800/80 text-amber-300";
+                dot.className = "relative inline-flex rounded-full h-2 w-2 bg-amber-400";
+                ping.className = "hidden";
+                text.innerText = "Simulation Mode (Offline)";
+                footerMode.innerText = "Mode: Standalone Demo Simulation";
+            }
+        }
+
+        // Auto-fill Demo Data
+        document.getElementById('fill-demo-btn').addEventListener('click', () => {
+            document.getElementById('product-name').value = "Oakwood Luxe Wardrobe";
+            document.getElementById('product-category').value = "Home & Furniture";
+            document.getElementById('target-audience').value = "Homeowners & Interior Enthusiasts";
+            document.getElementById('key-features').value = "Solid oak construction, built-in full length mirror, soft-close sliding doors, modular shelf layout.";
+            document.getElementById('tone').value = "High-Converting";
+        });
+
+        // Form Submission Handler
+        document.getElementById('ad-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const productName = document.getElementById('product-name').value;
+            const category = document.getElementById('product-category').value || "General";
+            const audience = document.getElementById('target-audience').value || "General Consumers";
+            const features = document.getElementById('key-features').value;
+            const tone = document.getElementById('tone').value;
+
+            const selectedPlatforms = Array.from(document.querySelectorAll('input[name="platform"]:checked')).map(cb => cb.value);
+            if (selectedPlatforms.length === 0) {
+                selectedPlatforms.push('Facebook');
+            }
+
+            const requestPayload = {
+                product_name: productName,
+                category: category,
+                target_audience: audience,
+                key_features: features,
+                tone: tone,
+                platforms: selectedPlatforms
+            };
+
+            document.getElementById('placeholder-state').classList.add('hidden');
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('cards-container').innerHTML = '';
+
+            let responseData;
+
+            try {
+                if (isBackendAvailable) {
+                    const res = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(requestPayload)
+                    });
+                    if (!res.ok) throw new Error('API request failed');
+                    responseData = await res.json();
+                } else {
+                    await new Promise(r => setTimeout(r, 1000));
+                    responseData = generateMockResponse(requestPayload);
+                }
+            } catch (error) {
+                await new Promise(r => setTimeout(r, 600));
+                responseData = generateMockResponse(requestPayload);
+            }
+
+            lastResponseData = responseData;
+
+            document.getElementById('loading-state').classList.add('hidden');
+            renderCards(responseData.results || []);
+            document.getElementById('raw-json').textContent = JSON.stringify(responseData, null, 2);
+            document.getElementById('copies-count-badge').innerText = (responseData.results || []).length;
+        });
+
+        // Dynamic Generator for Offline Simulation Mode
+        function generateMockResponse(payload) {
+            const results = [];
+            const platforms = payload.platforms.length > 0 ? payload.platforms : ['Facebook', 'Instagram'];
+
+            platforms.forEach((platform, idx) => {
+                let headline = "";
+                let body = "";
+                let cta = "";
+
+                if (platform === 'Facebook') {
+                    headline = `Upgrade Your Space with ${payload.product_name}`;
+                    body = `Elevate your home environment with ${payload.product_name}. Custom engineered for ${payload.target_audience}, this item blends style, efficiency, and everyday functionality.\n\n✨ Highlight Features:\n- ${payload.key_features.split(',').join('\n- ')}\n\nClick below to explore options and claim exclusive launch pricing!`;
+                    cta = "Shop Collection Now";
+                } else if (platform === 'Instagram') {
+                    headline = `The Ultimate ${payload.category} Upgrade ✨`;
+                    body = `Say goodbye to compromise. ${payload.product_name} combines premium design with modern features built specifically for ${payload.target_audience}.\n\nHighlights: ${payload.key_features}\n\nTap the link in bio to discover styles! 🔗\n#${payload.product_name.replace(/\s+/g, '')} #${payload.category.replace(/\s+/g, '')}`;
+                    cta = "Tap to Learn More";
+                } else if (platform === 'Google') {
+                    headline = `${payload.product_name} | Premium ${payload.category}`;
+                    body = `Discover ${payload.product_name}. Featuring ${payload.key_features}. Designed for ${payload.target_audience}. Order online today with fast shipping.`;
+                    cta = "View Models & Pricing";
+                } else {
+                    headline = `POV: You finally upgraded to ${payload.product_name} 😍`;
+                    body = `Hook: If you're looking for the best ${payload.category} upgrade on the market...\n\nScript: "I just got ${payload.product_name} and it exceeded every expectation. Designed for ${payload.target_audience} with ${payload.key_features}."`;
+                    cta = "Get Yours Today";
+                }
+
+                results.push({
+                    id: idx + 1,
+                    platform: platform,
+                    tone: payload.tone,
+                    headline: headline,
+                    primary_text: body,
+                    call_to_action: cta,
+                    character_count: (headline + body + cta).length
+                });
+            });
+
+            return {
+                status: "success",
+                timestamp: new Date().toISOString(),
+                request_meta: payload,
+                results: results
+            };
+        }
+
+        // Render Cards UI
+        function renderCards(results) {
+            const container = document.getElementById('cards-container');
+            container.innerHTML = '';
+
+            if (results.length === 0) {
+                container.innerHTML = `
+                    <div class="glass-panel p-8 rounded-2xl text-center text-slate-400 text-xs">
+                        No ad variants generated for the selected platforms.
+                    </div>
+                `;
+                return;
+            }
+
+            results.forEach(ad => {
+                const card = document.createElement('div');
+                card.className = "glass-panel p-6 rounded-2xl border border-slate-800 relative group hover:border-indigo-500/50 transition shadow-lg";
+                
+                let platformIcon = "fa-rectangle-ad text-indigo-400";
+                let badgeBg = "bg-indigo-950/60 border-indigo-800 text-indigo-300";
+                if (ad.platform === 'Facebook') {
+                    platformIcon = "fa-brands fa-facebook text-blue-400";
+                    badgeBg = "bg-blue-950/60 border-blue-800 text-blue-300";
+                } else if (ad.platform === 'Instagram') {
+                    platformIcon = "fa-brands fa-instagram text-pink-400";
+                    badgeBg = "bg-pink-950/60 border-pink-800 text-pink-300";
+                } else if (ad.platform === 'Google') {
+                    platformIcon = "fa-brands fa-google text-red-400";
+                    badgeBg = "bg-red-950/60 border-red-800 text-red-300";
+                } else if (ad.platform === 'TikTok') {
+                    platformIcon = "fa-brands fa-tiktok text-cyan-400";
+                    badgeBg = "bg-cyan-950/60 border-cyan-800 text-cyan-300";
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border ${badgeBg}">
+                            <i class="fa-solid ${platformIcon}"></i>
+                            <span>${ad.platform} Ad</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-mono text-slate-400 bg-slate-900 px-2 py-1 rounded-md border border-slate-800">${ad.character_count} chars</span>
+                            <button onclick="copyAdText(this, \`${encodeURIComponent(ad.headline + '\n\n' + ad.primary_text + '\n\nCTA: ' + ad.call_to_action)}\`)" 
+                                class="text-xs text-slate-400 hover:text-white bg-slate-900 hover:bg-slate-800 p-2 rounded-lg border border-slate-800 transition" title="Copy Ad Copy">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-wider font-semibold text-slate-500">Headline</span>
+                            <h4 class="text-sm font-semibold text-white mt-0.5">${escapeHtml(ad.headline)}</h4>
+                        </div>
+                        <div>
+                            <span class="text-[10px] uppercase tracking-wider font-semibold text-slate-500">Primary Text / Script</span>
+                            <p class="text-xs text-slate-300 mt-1 whitespace-pre-wrap leading-relaxed bg-slate-900/60 p-3 rounded-xl border border-slate-800/80 font-sans">${escapeHtml(ad.primary_text)}</p>
+                        </div>
+                        <div>
+                            <span class="text-[10px] uppercase tracking-wider font-semibold text-slate-500">Call to Action (CTA)</span>
+                            <div class="mt-1 inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 text-xs font-medium rounded-lg">
+                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                <span>${escapeHtml(ad.call_to_action)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function escapeHtml(text) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function copyAdText(btn, encodedText) {
+            const decodedText = decodeURIComponent(encodedText);
+            const textarea = document.createElement('textarea');
+            textarea.value = decodedText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast("Ad variant copied to clipboard!");
+            } catch (err) {
+                console.error('Failed to copy text', err);
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function copyPayload() {
+            if (!lastResponseData) return;
+            const textarea = document.createElement('textarea');
+            textarea.value = JSON.stringify(lastResponseData, null, 2);
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast("Raw JSON copied to clipboard!");
+            } catch (err) {
+                console.error('Failed to copy payload', err);
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.innerText = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        function switchTab(tabName) {
+            const tabCopies = document.getElementById('tab-copies');
+            const tabPayload = document.getElementById('tab-payload');
+            const viewCopies = document.getElementById('view-copies');
+            const viewPayload = document.getElementById('view-payload');
+
+            if (tabName === 'copies') {
+                tabCopies.className = "px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center gap-2 transition";
+                tabPayload.className = "px-4 py-2 text-sm font-medium rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 flex items-center gap-2 transition";
+                viewCopies.classList.remove('hidden');
+                viewPayload.classList.add('hidden');
+            } else {
+                tabPayload.className = "px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center gap-2 transition";
+                tabCopies.className = "px-4 py-2 text-sm font-medium rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 flex items-center gap-2 transition";
+                viewPayload.classList.remove('hidden');
+                viewCopies.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
